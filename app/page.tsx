@@ -4,11 +4,12 @@
 import Image from 'next/image'
 import useSWR from 'swr'
 import { fetchFromSupabase } from '@/lib/api'
+import { Article } from '@/types'
 
 const fetcher = (url: string) => fetchFromSupabase(url)
 
 export default function Home() {
-  const { data, error, isLoading } = useSWR('articles?select=*', fetcher)
+  const { data, error, isLoading } = useSWR<Article[]>('articles?select=*', fetcher)
 
   if (error) return <div className="text-red-500">エラーが発生しました</div>
   if (isLoading)
