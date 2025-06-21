@@ -7,4 +7,5 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  safelist: ['object-contain', 'object-cover', 'object-center', 'object-left', 'object-right'],
 }

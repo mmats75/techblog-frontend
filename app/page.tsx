@@ -8,6 +8,12 @@ import { Article } from '@/types'
 
 const fetcher = (url: string) => fetchFromSupabase(url)
 
+const leftAlignedCompanies = [
+  // 文字が画像の左寄りにあることが多い企業をここに追加
+  'Cloudflare',
+  'Vercel',
+]
+
 export default function Home() {
   const { data, error, isLoading } = useSWR<Article[]>(
     'articles?select=*,companies(display_name,logo_url)&order=published_at.desc',
@@ -31,12 +37,13 @@ export default function Home() {
             {/* 画像 */}
             <div className="relative w-full aspect-[3/2] overflow-hidden">
               <img
-                src={item.image_url || 'https://placehold.co/400x200?text=No+Image'}
+                src={item.image_url || '/no-image.png'}
                 alt={item.title}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = 'https://placehold.co/400x200?text=No+Image'
-                  e.currentTarget.onerror = null
+                onLoad={(e) => {
+                  const img = e.currentTarget
+                  const isLeftAligned = leftAlignedCompanies.includes(item.companies?.display_name ?? '')
+                  img.classList.add(isLeftAligned ? 'object-left' : 'object-center')
                 }}
               />
             </div>
@@ -45,7 +52,7 @@ export default function Home() {
             <div className="flex flex-col flex-1 p-4">
               {/* タイトル + 要約 */}
               <div className="space-y-2 flex-1">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{item.title_ja}</h2>
+                <h2 className="text-lg font-bold line-clamp-2 text-gray-800 dark:text-gray-100">{item.title_ja}</h2>
                 <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">{item.summary_ja}</p>
 
                 {/* タグ */}
@@ -64,17 +71,16 @@ export default function Home() {
               </div>
 
               {/* フッター：日付＋ロゴ */}
-              <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 pt-4">
+              <div className="h-6 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 pt-4">
                 <span>{new Date(item.published_at).toLocaleDateString('ja-JP')}</span>
-                {item.companies?.logo_url && (
+                {item.companies?.logo_url ? (
                   <img
                     src={item.companies.logo_url}
                     alt={item.companies.display_name}
-                    className="h-5 w-auto ml-2 shrink-0"
-                    // onError={(e) => {
-                    //   e.currentTarget.style.display = 'none'
-                    // }}
+                    className="h-6 w-auto ml-2 shrink-0"
                   />
+                ) : (
+                  <span>{item.companies?.display_name}</span>
                 )}
               </div>
             </div>
